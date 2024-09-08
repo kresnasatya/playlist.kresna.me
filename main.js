@@ -4,11 +4,10 @@ import playlist from './playlist.json';
 
 const tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
-var firstScriptTag = document.getElementsByTagName('script')['0'];
-firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+const target = document.body;
+target.parentNode.insertBefore(tag, target);
 
 let player;
-let isPlaying = false;
 // 0: No looping, 1: Loop current state, 2: Loop entire playlist
 let loopMode = 0;
 let currentSpeed = 1;
@@ -64,7 +63,6 @@ function onPlayerReady(event) {
 function handlePopState(event) {
     const videoId = getVideoIdFromUrl();
     player.loadVideoById(videoId);
-    isPlaying = true;
     renderPlaylist();
 }
 
@@ -91,7 +89,6 @@ function renderPlaylist() {
 function playVideoAt(index) {
     currentIndex = index;
     player.loadVideoById(playlist[currentIndex].id);
-    isPlaying = true;
     if (intervalId) {
         clearInterval(intervalId);
     }
@@ -105,14 +102,13 @@ function updateQueryString() {
 }
 
 function playPauseVideo() {
-    if (isPlaying) {
+    if (player.getPlayerState() === YT.PlayerState.PLAYING) {
         player.pauseVideo();
         document.getElementById('playPause').innerText = 'Play';
     } else {
         player.playVideo();
         document.getElementById('playPause').innerText = 'Pause';
     }
-    isPlaying = !isPlaying;
 }
 
 function updateSeekBar() {
@@ -141,7 +137,6 @@ function nextVideo() {
     if (loopMode !== 0 || currentIndex < playlist.length - 1) {
         currentIndex = (currentIndex + 1) % playlist.length;
         player.loadVideoById(playlist[currentIndex].id);
-        isPlaying = true;
         clearInterval(intervalId); // Clear interval when changing video
         renderPlaylist();
         updateQueryString();
@@ -153,7 +148,6 @@ function nextVideo() {
 function prevVideo() {
     currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
     player.loadVideoById(playlist[currentIndex].id);
-    isPlaying = true;
     clearInterval(intervalId); // Clear interval when changing video
     renderPlaylist();
     updateQueryString();
@@ -200,8 +194,6 @@ function onPlayerStateChange(event) {
     }
 
     if (event.data === YT.PlayerState.ENDED) {
-        isPlaying = false;
-
         if (loopMode === 1) {
             // Loop the current video
             player.playVideo();
@@ -212,7 +204,6 @@ function onPlayerStateChange(event) {
             // Loop back to the first video when the last video ends
             currentIndex = 0;
             player.loadVideoById(playlist[currentIndex].id);
-            isPlaying = true;
         } else if (loopMode === 0 && currentIndex < playlist.length - 1) {
             // No looping, but move to the next video in the playlist
             nextVideo();
