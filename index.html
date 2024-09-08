@@ -4,11 +4,27 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kresna's Playlist - playlist.kresna.me</title>
+    <title>Kresna's Playlist - playlist.kresna.me</title>    
   </head>
   <body>
     <div id="app">
-      
+      <h1><a href="/">playlist.kresna.me</a></h1>
+      <div id="player"></div>
+      <div class="controls" style="display: flex; justify-content: space-between;">
+        <div>
+          <button id="playPause">Play</button>
+          <button id="loop">No Looping</button>
+          <button id="speed">Speed</button>
+          <input type="range" id="seekBar" min="0" max="100" value="0" step="1" />
+          <span id="current-time">0:00</span>/<span id="total-duration">0:00</span>
+        </div>
+        <div>
+          <button id="prev">Previous</button>
+          <button id="next">Next</button>
+        </div>
+      </div>
+      <h2 style="text-align: justify;" id="number-of-songs">1 Song</h2>
+      <div id="playlist" class="playlist"></div>
     </div>
     <script type="module" src="/main.js"></script>
   </body>
