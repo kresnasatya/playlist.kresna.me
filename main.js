@@ -173,50 +173,48 @@ function toggleLoop() {
 }
 
 function onPlayerStateChange(event) {
-    if (event.data === YT.PlayerState.PLAYING) {
-        // Clear any existing interval
-        if (intervalId) {
+    switch (event.data) {
+        case YT.PlayerState.PLAYING:
+            displayVideoDuration();
+            // Clear any existing interval
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+
+            // Set a new interval
+            intervalId = setInterval(updateSeekBar, 1000);
+
+            document.getElementById('playPause').innerText = 'Pause';
+            break;
+        case YT.PlayerState.PAUSED:
+            document.getElementById('playPause').innerText = 'Play';
+            break;
+        case YT.PlayerState.ENDED:
+            if (loopMode === 1) {
+                // Loop the current video
+                player.playVideo();
+            } else if (loopMode === 2 && currentIndex < playlist.length - 1) {
+                // Loop the entire playlist if not at the last video
+                nextVideo();
+            } else if (loopMode === 2 && currentIndex === playlist.length - 1) {
+                // Loop back to the first video when the last video ends
+                currentIndex = 0;
+                player.loadVideoById(playlist[currentIndex].id);
+            } else if (loopMode === 0 && currentIndex < playlist.length - 1) {
+                // No looping, but move to the next video in the playlist
+                nextVideo();
+            } else if (loopMode === 0 && currentIndex === playlist.length - 1) {
+                console.log('Playlist ended, no looping');
+            }
+    
+            // Stop updating when video ends
             clearInterval(intervalId);
-        }
 
-        // Set a new interval
-        intervalId = setInterval(updateSeekBar, 1000);
-
-        document.getElementById('playPause').innerText = 'Pause';
-    }
-
-    if (event.data === YT.PlayerState.PAUSED) {
-        document.getElementById('playPause').innerText = 'Play';
-    }
-
-    if (event.data === YT.PlayerState.PLAYING || event.data === YT.PlayerState.PAUSED) {
-        displayVideoDuration();
-    }
-
-    if (event.data === YT.PlayerState.ENDED) {
-        if (loopMode === 1) {
-            // Loop the current video
-            player.playVideo();
-        } else if (loopMode === 2 && currentIndex < playlist.length - 1) {
-            // Loop the entire playlist if not at the last video
-            nextVideo();
-        } else if (loopMode === 2 && currentIndex === playlist.length - 1) {
-            // Loop back to the first video when the last video ends
-            currentIndex = 0;
-            player.loadVideoById(playlist[currentIndex].id);
-        } else if (loopMode === 0 && currentIndex < playlist.length - 1) {
-            // No looping, but move to the next video in the playlist
-            nextVideo();
-        } else if (loopMode === 0 && currentIndex === playlist.length - 1) {
-            console.log('Playlist ended, no looping');
-        }
-
-        // Stop updating when video ends
-        clearInterval(intervalId);
+            document.getElementById('playPause').innerText = 'Play';
+            break;
     }
 }
 
 function displayVideoDuration() {
-  const duration = player.getDuration();
-  document.getElementById('total-duration').innerText = formatTime(duration);
+  document.getElementById('total-duration').innerText = formatTime(player.getDuration());
 }
